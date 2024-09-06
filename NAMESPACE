@@ -1,0 +1,4 @@
+import(foreach, parallel, doParallel)
+importFrom("stats", "p.adjust", "pnorm", "weighted.mean")
+export(mic, pool_mic)
+S3method(print, mic)
