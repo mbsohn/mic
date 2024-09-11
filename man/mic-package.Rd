@@ -19,7 +19,7 @@ Sohn, M.B., Scheible, K., and Gill, S.R. \emph{A semi-parametric multiple imputa
 \dontrun{
 library(tidyverse); library(emdbook)
 # Simulate a dataset using a zero-inflated negative binomial model
-n.smpl <- 100; n.taxa <- 200
+n.smpl <- 100; n.taxa <- 200; prop.str.zeros <- 0.5
 n.low.abun <- round(n.taxa*0.6)
 n.mid.abun <- round(n.taxa*0.3)
 n.high.abun <- n.taxa - n.low.abun - n.mid.abun
