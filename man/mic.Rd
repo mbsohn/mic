@@ -45,7 +45,7 @@ sim.size <- sample(seq(0.5, 2, 0.1), n.taxa, rep=TRUE)
 M <- rzinbinom(n = n.smpl*n.taxa,
                mu = as.vector(outer(sim.wt, sim.mean, "*")),
                size = rep(sim.size, each=n.smpl),
-               zprob = prop.str.zeros) %>%
+               zprob = prop.str.zeros) \%>\%
      matrix(., nrow=n.smpl, ncol=n.taxa)
 
 # Run mic
