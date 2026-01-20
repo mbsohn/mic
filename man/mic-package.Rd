@@ -2,7 +2,7 @@
 \alias{mic-package}
 \docType{package}
 \title{
-A semi-parametric multiple imputation method for high-sparse, high-dimensional, compositional data
+A multiple imputation method for compositional microbiome data
 }
 \description{
 Generate multiple imputed compositional data
@@ -13,7 +13,7 @@ Michael B. Sohn
 Maintainer: Michael B. Sohn <michael_sohn@urmc.rochester.edu>
 }
 \references{
-Sohn, M.B., Scheible, K., and Gill, S.R. \emph{A semi-parametric multiple imputation method for high-sparse, high-dimensional, compositional data} (Submitted)
+Sohn, M.B., Gill, S.R., and Scheible, K. \emph{A multiple imputation method for compositional microbiome data} (Submitted)
 }
 \examples{
 \dontrun{

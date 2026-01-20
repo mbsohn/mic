@@ -1,7 +1,7 @@
 ---
 title: "README"
 author: "Michael B. Sohn"
-date: "09/05/2024"
+date: "01/20/2026"
 output: rmarkdown::github_document
 ---
 
@@ -20,12 +20,12 @@ install.packages("devtools")
 devtools::install_github("mbsohn/mic")
 
 
-### Example: Generate 200 imputed profiles
+### Example: Generate 20 imputed profiles
 
 ```{r, message=FALSE, warning=FALSE}
 library(mic); library(tidyverse); library(emdbook)
 # Simulate datasets for two groups using zero-inflated negative binomial models
-set.seed(2024)
+set.seed(2026)
 n.smpl <- 50; n.taxa <- 100; prop.str.zeros <- 0.5; da.taxa.prop <- 0.2
 n.low.abun <- round(n.taxa*0.6)
 n.mid.abun <- round(n.taxa*0.3)
@@ -57,31 +57,33 @@ y <- c(rep(0, n.smpl), rep(1, n.smpl))
 # Get differentially abundant taxa
 is.true.da.taxa <- (sim.mean1 != sim.mean2)
 true.da.taxa <- paste0("T", which(is.true.da.taxa))
-# Construct a design matrix
-X <- model.matrix(~y)
 # Run mic
-rslt <- mic(M.f, X=X, pdenom=0.30, nimp=200)
+rslt <- mic(M=M.f, G=y, nimp=20)
 ```
 
-### Differential abundance analysis for two groups using LinDA
-
+### Differential abundance analysis using OPTIMEM
 ```{r, message=FALSE, warning=FALSE}
-library(LinDA)
-# Run DA analysis on imputed profiles using LinDA
-da.rslt.mic.fc <- da.rslt.mic.fc.se <- list()
-for(i in 1:length(rslt)){
-  M.tmp <- rslt[[i]] %>% t()
-  colnames(M.tmp) <- paste0("S", 1:ncol(M.tmp))
-  Meta.dat <- data.frame(sid=colnames(M.tmp), arm=as.factor(y))
-  linda.out <- linda(M.tmp, Meta.dat, formula='~arm')
-  da.rslt.mic.fc[[i]] <- linda.out$output$arm1$log2FoldChange
-  da.rslt.mic.fc.se[[i]] <- linda.out$output$arm1$lfcSE
+library(optimem); library(sandwich)
+# To identify a reference set for the additive log-ratio transformation
+rslt.opt <- optimem(M=M.f, y=y, eta=0.001, early.exit=FALSE)
+##### 
+da.rslt.coef <- da.rslt.var <- da.rslt.pval <- 
+  matrix(0, nrow=length(rslt$Group1), ncol=ncol(rslt$Group1[[1]]))
+colnames(da.rslt.coef) <- colnames(da.rslt.var) <- 
+  colnames(da.rslt.pval) <- colnames(rslt$Group1[[1]])
+for(i in 1:length(rslt$Group1)){
+  M.tmp <- rbind(rslt$Group1[[i]], rslt$Group2[[i]])
+  refs.tmp <- rowSums(M.tmp[, rslt.opt$nonDAtaxa_min])
+  alrM.tmp <- sweep(M.tmp, 1, refs.tmp, "/") %>% log()
+  for(j in 1:ncol(alrM.tmp)){
+    lm.tmp <- lm(alrM.tmp[,j] ~ y)
+    da.rslt.coef[i,j] <- summary(lm.tmp)$coef[2, "Estimate"]
+    da.rslt.var[i,j] <- vcovHC(lm.tmp, type="HC3")[2,2]
+    da.rslt.pval[i,j] <- summary(lm.tmp)$coef[2, "Pr(>|t|)"]
+  }
 }
 # Pool the estimates
-est.mat <- simplify2array(da.rslt.mic.fc)
-se.mat <- simplify2array(da.rslt.mic.fc.se)
-rownames(est.mat) <- colnames(M.f)
-pool.rslt <- pool_mic(est.mat, se.mat)
+da.rslt <- pool_mic(t(da.rslt.coef), t(da.rslt.var))
 cat("DA taxa: ", true.da.taxa, "\n")
-print(pool.rslt)
+print(da.rslt)
 ```

@@ -1,28 +1,31 @@
 \name{mic}
 \alias{mic}
 \title{
-A semi-parametric multiple imputation method for high-sparse, high-dimensional, compositional data
+A multiple imputation method for compositional microbiome data
 }
 \description{
 Generate multiple imputed compositional data
 }
 \usage{
-mic(M, X=NULL, wt=NULL, nimp=100, pdenom=0.5)
+mic(M, G=NULL, wt=NULL, nimp=100, pdenom=0.5, imp.model="mean",
+    sequential=FALSE, cutoff=0.1, pmin=2)
 }
 \arguments{
   \item{M}{a matrix of compositional data}
-  \item{X}{a matrix of covariates}
+  \item{G}{a vector of group membership}
   \item{wt}{a weight for each sample}
   \item{nimp}{the number of imputations}
   \item{pdenom}{the proportion of taxa whose sum is used for denominator in ratio}
-
-  Note: Argument pdenom
+  \item{imp.model}{currently available imputation models: mean or linear}
+  \item{sequential}{whether or not sequentially impute components}
+  \item{cutoff}{the minimum proportion of zeros in a component not to be included in imputation}
+  \item{pmin}{a factor determining a small value that replaces zeros}
 }
 \value{
   A list of imputed compositional matrices
 }
 \references{
-  Sohn, M.B., Scheible, K., and Gill, S.R. \emph{A semi-parametric multiple imputation method for high-sparse, high-dimensional, compositional data} (Submitted)
+  Sohn, M.B., Gill, S.R., and Scheible, K. \emph{A multiple imputation method for compositional microbiome data} (Submitted)
 }
 \author{
   Michael B. Sohn

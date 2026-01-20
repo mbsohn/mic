@@ -1,6 +1,6 @@
 Package: mic
 Type: Package
-Title: A Semi-Parametric Multiple Imputation Method for High-Sparse, High-Dimensional, Compositional Data
+Title: A multiple imputation method for compositional microbiome data
 Version: 0.1.0
 Author: Michael B. Sohn
 Maintainer: Michael B. Sohn <michael_sohn@urmc.rochester.edu>

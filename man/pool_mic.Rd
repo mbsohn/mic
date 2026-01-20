@@ -7,18 +7,18 @@ Pool parameter estimates
 Combine multiple parameter estimates from imputed data by mic into an overall estimate and variance, incorporating both the within and between imputation variability
 }
 \usage{
-pool_mic(est.mat, se.mat, padj.method="holm")
+pool_mic(est.mat, wiv.mat, padj.method="holm")
 }
 \arguments{
   \item{est.mat}{a matrix of multiple parameter estimates}
-  \item{se.mat}{a matrix of multiple parameter estimates' standard errors}
+  \item{wiv.mat}{a matrix of multiple parameter estimates' within imputation variances}
   \item{padj.method}{a method for multiple testing correction}
 }
 \value{
   A data frame consisting of Wald statistics, p-values, and adjusted p-values
 }
 \references{
-  Sohn, M.B., Scheible, K., and Gill, S.R. \emph{A semi-parametric multiple imputation method for high-sparse, high-dimensional, compositional data} (Submitted)
+  Sohn, M.B., Scheible, K., and Gill, S.R. \emph{A multiple imputation method for compositional microbiome data} (Submitted)
 }
 \author{
   Michael B. Sohn
@@ -64,27 +64,24 @@ y <- c(rep(0, n1), rep(1, n2))
 is.true.da.taxa <- (sim.mean1 != sim.mean2)
 true.da.taxa <- paste0("T", which(is.true.da.taxa))
 
-# Construct a design matrix
-X <- model.matrix(~y)
-
 # Run mic
-rslt <- mic(M.f, X=X, pdenom=0.30, nimp=200)
+rslt <- mic(M=M.f, G=y, nimp=20)
 
 # Run DA analysis on imputed profiles using LinDA
-da.rslt.mic.fc <- da.rslt.mic.fc.se <- list()
+da.rslt.mic.fc <- da.rslt.mic.fc.wiv <- list()
 for(i in 1:length(rslt)){
-  M.tmp <- rslt[[i]] %>% t()
+  M.tmp <- rslt[[i]] \%>\% t()
   colnames(M.tmp) <- paste0("S", 1:ncol(M.tmp))
   Meta.dat <- data.frame(sid=colnames(M.tmp), arm=as.factor(y))
   linda.out <- linda(M.tmp, Meta.dat, formula='~arm')
   da.rslt.mic.fc[[i]] <- linda.out$output$arm1$log2FoldChange
-  da.rslt.mic.fc.se[[i]] <- linda.out$output$arm1$lfcSE
+  da.rslt.mic.fc.wiv[[i]] <- linda.out$output$arm1$lfcSE^2
 }
 
 # Pool the estimates
 est.mat <- simplify2array(da.rslt.mic.fc)
-se.mat <- simplify2array(da.rslt.mic.fc.se)
+wiv.mat <- simplify2array(da.rslt.mic.fc.wiv)
 rownames(est.mat) <- colnames(M.f)
-pool.rslt <- pool_mic(est.mat, se.mat)
+pool.rslt <- pool_mic(est.mat, wiv.mat)
 }
 }
